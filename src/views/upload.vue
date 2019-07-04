@@ -35,7 +35,7 @@
     </el-form-item>
     <el-dialog title="选择sheet" :visible.sync="selDialogFormVisible">
         <el-form style="margin:0 120px 0 120px">
-            <el-form-item label="系统检测到所选excel有多个sheet，请选择需要导入的sheet：">
+            <el-form-item label="系统检测到所选excel有多个sheet，请选择需要导入的sheet：" required>
                 <el-select v-model="sheetName" placeholder="请选择sheet名称" >
                     <el-option v-for="val in sheets" :key=val :label="val" :value="val">
                     </el-option>
@@ -69,6 +69,7 @@ export default {
     methods: {
         handleConfirm(){
 
+            console.log(this.sheetName)
         },
         formOff(){
             this.selDialogFormVisible=false
