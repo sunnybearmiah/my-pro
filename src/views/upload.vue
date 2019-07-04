@@ -104,6 +104,8 @@ export default {
             this.sheets = await getExcel(file.raw,getSheets)
             if (this.sheets.length > 1){
                 this.selDialogFormVisible = true
+            }else{
+                this.sheetName = this.sheets[0]
             }
             console.log("_____________")
             console.log(this.sheets)
