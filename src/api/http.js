@@ -40,16 +40,16 @@ export const classInfo = params => { return instance.get('/selectAllClass', {par
 export const classInfoFilter = params => { return instance.get('/selectClasses', {params: params}).then(res => res.data) }
 
 // POST方法使用非json形式传输
-instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+// instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 // 学生信息增删改
-export const addStu = params => { return instance.post('/insertAction', qs.stringify(params)).then(res => res.data) }
-export const delStu = params => { return instance.post('/deleteAction', qs.stringify(params)).then(res => res.data) }
-export const updStu = params => { return instance.post('/updateAction', qs.stringify(params)).then(res => res.data) }
+export const addStu = params => { return instance.post('/insertAction', params).then(res => res.data) }
+export const delStu = params => { return instance.post('/deleteAction', params).then(res => res.data) }
+export const updStu = params => { return instance.post('/updateAction', params).then(res => res.data) }
 
 // 班级信息增删改
-export const addClass = params => { return instance.post('/addClasses', qs.stringify(params)).then(res => res.data) }
-export const delClass = params => { return instance.post('/deleteClasses', qs.stringify(params)).then(res => res.data) }
-export const updClass = params => { return instance.post('/updateClasses', qs.stringify(params)).then(res => res.data) }
+export const addClass = params => { return instance.post('/addClasses', params).then(res => res.data) }
+export const delClass = params => { return instance.post('/deleteClasses', params).then(res => res.data) }
+export const updClass = params => { return instance.post('/updateClasses', params).then(res => res.data) }
 
 // 文件上传
 // instance.defaults.headers.post['Content-Type'] = 'multipart/form-data; charset=UTF-8'

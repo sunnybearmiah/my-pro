@@ -108,7 +108,7 @@ export default {
             formLabelWidth :'150px',
             rulesAdd:{
                 class_name:[{required:true,message:'请输入名字',trigger:'blur'},
-                    {min:1,max:6,message:'名字长度在1到6个字符',trigger:'blur'}]
+                    {pattern:/^[a-zA-Z0-9_\u4e00-\u9fa5]{1,6}$/,message:'名字长度在1到6个字符的中文数字字母和下划线',trigger:'blur'}]
             }
         }
     },

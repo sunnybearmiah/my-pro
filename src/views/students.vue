@@ -166,7 +166,7 @@ export default {
                 no:[{required:true,message:'请输入学号',trigger:'blur'},
                     {pattern:/^[1-9]{1,5}[0-9]{0,1}$/,message:'学号不能超过六位整数,不能以0开头',trigger:'blur'}],
                 name:[{required:true,message:'请输入名字',trigger:'blur'},
-                    {min:1,max:6,message:'姓名长度在1到6个字符',trigger:'blur'}]
+                    {pattern:/^[a-zA-Z0-9_\u4e00-\u9fa5]{1,6}$/,message:'姓名长度在1到6个字符的中文数字字母和下划线',trigger:'blur'}]
             }
         }
     },
@@ -211,10 +211,10 @@ export default {
         },
         getStu(){ //获取列表
             let params = {
-                no:this.filter.no,
-                name:this.filter.name,
-                sex:this.filter.sex,
-                class_name:this.filter.classes
+                no:this.filter.no.trim(),
+                name:this.filter.name.trim(),
+                sex:this.filter.sex.trim(),
+                class_name:this.filter.classes.trim()
             };
 
             let aa = stuInfo
@@ -251,10 +251,10 @@ export default {
         },
         handleAdd(){ //新增确定按钮
             let params = {
-                no:this.addForm.no,
-                name:this.addForm.name,
-                sex:this.addForm.sex,
-                class_name:this.addForm.classes
+                no:parseInt(this.addForm.no.trim()),
+                name:this.addForm.name.trim(),
+                sex:this.addForm.sex.trim(),
+                class_name:this.addForm.classes.trim()
             };
             this.$refs["addForm"].validate((valid) =>{
                 if(!valid){
@@ -330,9 +330,9 @@ export default {
             let params = {
                 id:this.updForm.id,
                 no:this.updForm.no,
-                name:this.updForm.name,
-                sex:this.updForm.sex,
-                class_name:this.updForm.classes
+                name:this.updForm.name.trim(),
+                sex:this.updForm.sex.trim(),
+                class_name:this.updForm.classes.trim()
             };
             this.$refs["updForm"].validate((valid) =>{
                 if(!valid){
