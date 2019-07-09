@@ -6,7 +6,7 @@
                 <div class="pos1">
                     <span>文件地址：</span>
                     <el-input v-model="uploadFileName" value="uploadFileName" placeholder="请单击选取文件按钮" style="width:60%"></el-input>
-                    <el-button size="small" type="primary" style="margin-left:1%" @click="preview">预览</el-button>
+                    <el-button size="small" type="primary" style="margin-left:1%" @click="preview" :disabled="previewBtn">预览</el-button>
                     <div>只能上传xls/xlsx文件，且不超过500kb</div>
                 </div>
                 <div class="pos2">
@@ -52,18 +52,27 @@
         <el-dialog title="文件检测中" :visible.sync="cheDialogVisible">
             <el-progress type="circle" :percentage="percent" :status="progressStatus"></el-progress>
         </el-dialog>
-        <el-dialog title="预览" :visible.sync="previewDialogVisible">
-
-        </el-dialog>
     </el-card>
+    <el-dialog title="文件预览" :visible.sync="previewDialogVisible">
+        <el-table
+            :data="sheetConcent"
+            style="width:100%"
+            highlight-current-row
+            max-height="400">
+            <el-table-column type="index" label="序号" width="80"></el-table-column>
+            <el-table-column prop="__rowNum__" label="行号" width="80"></el-table-column>
+            <el-table-column v-for="(val,k,index) in sheetRow" v-bind:key="index" :prop="val" :label="val"></el-table-column>
+        </el-table>
+    </el-dialog>
     <div id="errorTb" style="display:none;">
+        <div style="margin:5px"><font size="4" color="red"><b>检测结果错误提示</b></font></div>
         <el-table
             :data="errorTable"
             style="width:100%"
             highlight-current-row
             max-height="475">
-            <el-table-column type="index" label="序号" width="50"></el-table-column>
-            <el-table-column prop="roder" label="行号" width="50"></el-table-column>
+            <el-table-column type="index" label="序号" width="80"></el-table-column>
+            <el-table-column prop="roder" label="行号" width="80"></el-table-column>
             <el-table-column prop="no" label="学号" width="100"></el-table-column>
             <el-table-column prop="name" label="姓名" width="100"></el-table-column>
             <el-table-column prop="sex" label="性别" width="100"></el-table-column>
@@ -87,12 +96,14 @@ export default {
             sheetName:'',
             sheetId:0,
             sheetConcent:[],
+            sheetRow:[],
             selDialogFormVisible:false,
             errorTable:[],
             cheDialogVisible:false,
             percent:0,
             progressStatus:"success",
             previewDialogVisible:false,
+            previewBtn:true,
             importBtn:true  //导入按钮是否可用
         }
     },
@@ -113,6 +124,7 @@ export default {
                 let errorDiv = document.getElementById("errorTb")
                 errorDiv.style.display = 'block'
             }
+            this.previewBtn = false
         },
         formOff(){
             this.selDialogFormVisible=false
@@ -124,7 +136,14 @@ export default {
             this.uploadFileMsg = {}
             this.sheetName = ''
             this.sheetConcent = []
+            this.sheetRow = []
             this.sheets = []
+            this.errorTable = []
+            this.cheDialogVisible = false
+            this.previewDialogVisible = false
+            this.previewBtnv = true
+            let errorDiv = document.getElementById("errorTb")
+            errorDiv.style.display = 'none'
         },
         handleExceed(files, fileList) { //选择文件后
             this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
@@ -160,8 +179,10 @@ export default {
                 console.log(this.sheetConcent)
                 this.checkContent()
                 if(this.errorTable.length === 0){
+                    this.cheDialogVisible = false
                     this.$message.success("上传文件格式校验成功，请点击上传按钮上传文件")
                     this.importBtn = false //允许导入
+
                 }else{
                     //展示表格
                     this.progressStatus = "warning"
@@ -170,6 +191,7 @@ export default {
                     errorDiv.style.display = 'block'
                 }
             }
+            this.previewBtn = false
         },
         // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet    .xlsx
         // application/vnd.ms-excel        .xls
@@ -195,10 +217,15 @@ export default {
         },
         handlePreview(file) { //点击文件列表中的文件,让他预览吧
             console.log("__________")
-            console.log(file);
+            console.log(this.sheetRow)
+            console.log(this.sheetConcent);
+            this.previewDialogVisible = true
         },
         preview(){ //预览
             console.log("preview")
+            console.log(this.sheetRow)
+            console.log(this.sheetConcent);
+            this.previewDialogVisible = true
         },
         download(){
             console.log("download")
@@ -211,6 +238,9 @@ export default {
             //先校验格式 10%
             let title = ['no','name','sex','classes']
             let row = this.sheetConcent[0]
+            for(let key in row){
+                this.sheetRow.push(key)
+            }
             for (let i=0;i<title.length;i++){
                 let col = title[i]
                 let exists = false
@@ -292,3 +322,4 @@ export default {
     float:left
 }
 </style>
+<style lang="less" src="../css/table.less" scoped></style>
