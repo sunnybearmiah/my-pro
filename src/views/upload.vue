@@ -7,7 +7,7 @@
                     <span>文件地址：</span>
                     <el-input v-model="uploadFileName" value="uploadFileName" placeholder="请单击选取文件按钮" style="width:60%"></el-input>
                     <el-button size="small" type="primary" style="margin-left:1%" @click="preview" :disabled="previewBtn">预览</el-button>
-                    <div>只能上传xls/xlsx文件，且不超过500kb</div>
+                    <div>只能上传xlsx文件，且不超过5Mb</div>
                 </div>
                 <div class="pos2">
                     <el-upload
@@ -60,8 +60,8 @@
             highlight-current-row
             max-height="400"
             border>
-            <el-table-column type="index" label="序号" width="80"></el-table-column>
-            <el-table-column prop="__rowNum__" label="行号" width="80"></el-table-column>
+            <el-table-column type="index" label="序号" width="100px"></el-table-column>
+            <el-table-column prop="__rowNum__" label="行号" width="100px"></el-table-column>
             <el-table-column v-for="(val,k,index) in sheetRow" v-bind:key="index" :prop="val" :label="val"></el-table-column>
         </el-table>
     </el-dialog>
@@ -81,7 +81,7 @@
                     </el-form>
                 </template>
             </el-table-column>
-            <el-table-column type="index" label="序号" ></el-table-column>
+            <el-table-column type="index" label="序号" width="100px"></el-table-column>
             <el-table-column prop="roder" label="行号" ></el-table-column>
             <el-table-column prop="no" label="学号" ></el-table-column>
             <el-table-column prop="name" label="姓名" ></el-table-column>
@@ -169,9 +169,9 @@ export default {
                 this.$message.warning("上传的文件只能是excel文件")
                 return
             }
-            if((size/1024)>500){
+            if((size/1024/1024)>5){
                 this.fileList = []
-                this.$message.warning("上传的文件大小必须小于500kb")
+                this.$message.warning("上传的文件大小必须小于5Mb")
                 return
             }
             this.uploadFileName = file.name
