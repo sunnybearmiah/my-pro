@@ -1,46 +1,51 @@
 <template>
     <el-container style="height:100%; width:100%">
-        <el-aside id="aside" style="width:200px">
-            <h5 style="text-align:center">自定义</h5>
+        <el-aside id="aside" :class="collapsed?'menu-collapsed':'menu-expanded'">
+            <h5 style="text-align:center">学校管理系统</h5>
             <el-menu
-            default-active="this.$route.path"
-            class="el-menu-vertical-demo"
-            @open="handleOpen"
-            @close="handleClose"
-            unique-opened
-            background-color="#409EFF"
-            text-color="#000405"
-            active-text-color="#ffffff"
-            router>
-                <el-menu-item index="/">
-                    <i class="el-icon-s-home"></i>
-                    <span class="menuTitle" slot="title">首页</span>
-                </el-menu-item>
-                <el-submenu index="2">
-                    <template slot="title">
-                        <i class="el-icon-s-custom"></i>
-                        <span class="menuTitle">班级管理</span>
+                default-active="this.$route.path"
+                class="el-menu-vertical-demo"
+                text-color="#000405"
+                active-text-color="#ffffff"
+                background-color="#409EFF"
+                @open="handleOpen"
+                @close="handleClose"
+                unique-opened
+                :collapse="collapsed"
+                :collapse-transition="dh"
+                router>
+                <template v-for="(list,k,idx) in menuList">
+                    <template v-if="list.uri">
+                        <el-menu-item v-bind:key="idx" :index="list.uri">
+                            <i :class="list.icon"></i>
+                            <span class="menuTitle" slot="title">{{ list.name }}</span>
+                        </el-menu-item>
                     </template>
-                    <el-menu-item index="/classes">
-                        <span slot="title">班级</span>
-                    </el-menu-item>
-                </el-submenu>
-                <el-submenu index="3">
-                    <template slot="title">
-                        <i class="el-icon-user"></i>
-                        <span class="menuTitle">学生管理</span>
+                    <template v-else>
+                        <el-submenu v-bind:key="idx" :index="list.id.toString()">
+                            <template slot="title">
+                                <i :class="list.icon"></i>
+                                <span class="menuTitle">{{ list.name }}</span>
+                            </template>
+                            <template v-if="list.item">
+                                <el-menu-item v-for="(subList,k,idx) in list.item" v-bind:key="idx" :index="subList.uri">
+                                    <i class="el-icon-caret-right"></i>
+                                    <span slot="title" class="item-menu">{{ subList.name }}</span>
+                                </el-menu-item>
+                            </template>
+                        </el-submenu>
                     </template>
-                    <el-menu-item index="/stu">
-                        <span slot="title">学生</span>
-                    </el-menu-item>
-                    <el-menu-item index="/stu/upload">
-                        <span slot="title">导入学生</span>
-                    </el-menu-item>
-                </el-submenu>
+                </template>
             </el-menu>
         </el-aside>
         <el-container>
             <el-header id="header">
+                <div class="header_0" v-show="!collapsed">
+                    <i class="icon el-icon-s-fold" @click.prevent="collapse()"></i>
+                </div>
+                <div class="header_0" v-show="collapsed">
+                    <i class="icon el-icon-s-unfold" @click.prevent="expand()"></i>
+                </div>
                 <div class="header_1">
                     <el-breadcrumb id="head_bread" separator-class="el-icon-arrow-right">
                         <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
@@ -65,18 +70,22 @@
                 <router-view/>
             </el-main>
             <el-footer id="footer" style="height:30px">
-                <span>夜阑卧听风吹雨，铁马冰河入梦来</span>
+                <span>朝饮木兰之坠露，夕餐秋菊之落英</span>
             </el-footer>
         </el-container>
     </el-container>
 </template>
 
 <script>
+const menu = require('../common/menu')
 export default {
     name: 'home',
     data(){
        return{
-           userName:'miah'
+           userName:'miah',
+           menuList:[],
+           collapsed:false,
+           dh:false
        }
     },
     watch: {
@@ -85,9 +94,22 @@ export default {
         }
     },
     created:function(){
+        this.getMenu
         this.getBreadcrumb()
     },
+    computed:{
+        getMenu:function(){
+            this.menuList = menu.default.menu
+            return this.menuList
+        }
+    },
     methods: {
+        collapse(){
+            this.collapsed = true
+        },
+        expand(){
+            this.collapsed = false
+        },
         getBreadcrumb() {
             //$route.matched一个数组 包含当前路由的所有嵌套路径片段的路由记录
             let matched = this.$route.matched.filter(item => item.name)
@@ -105,9 +127,30 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
+.header_0{
+    width: 5%;
+    float: left;
+    height: 100%;
+    line-height: 80px;
+    text-align: left
+}
+
+.icon{
+    font-size: 30px
+}
+
+.menu-collapsed {
+    flex: 0 0 60px;
+    width: 60px;
+}
+.menu-expanded {
+    flex: 0 0 200px;
+    width: 200px;
+}
+
 .header_1{
-    width: 70%;
+    width: 60%;
     float: left;
     height: 100%;
     line-height: 60px;
@@ -119,9 +162,10 @@ export default {
   text-align: left
 }
 
-.el-header{
+/deep/.el-header{
   background:  #409EFF;
-  height:60px
+  height:60px;
+  padding:0
 }
 
 .el-main{
@@ -152,4 +196,14 @@ export default {
     font-size: 15px;
     font-weight:bold
 }
+
+/deep/.el-menu{
+    border-right: none;
+    background-color: rgb(64, 158, 255);
+}
+
+/deep/.el-icon-arrow-down:before{
+    content:"\E794"
+}
+
 </style>

@@ -3,26 +3,35 @@ export default {
     {
       id: 1,
       name: '首页',
-      icon: 'xxx',
-      uri: 'xxx'
+      icon: 'el-icon-s-home',
+      uri: '/'
     },
     {
       id: 2,
       name: '班级管理',
-      icon: 'xxx',
-      uri: 'xxx'
+      icon: 'el-icon-s-custom',
+      item: [
+        {
+          id: 1,
+          name: '班级',
+          uri: '/classes'
+        }
+      ]
     },
     {
       id: 3,
       name: '学生管理',
-      icon: 'xxx',
-      uri: 'xxx',
+      icon: 'el-icon-user',
       item: [
         {
           id: 1,
-          name: '新增',
-          icon: 'xxx',
-          uri: 'xxx'
+          name: '学生',
+          uri: '/stu'
+        },
+        {
+          id: 2,
+          name: '导入学生',
+          uri: '/stu/upload'
         }
       ]
     }
