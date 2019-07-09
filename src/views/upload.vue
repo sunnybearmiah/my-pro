@@ -53,12 +53,13 @@
             <el-progress type="circle" :percentage="percent" :status="progressStatus"></el-progress>
         </el-dialog>
     </el-card>
-    <el-dialog title="文件预览" :visible.sync="previewDialogVisible">
+    <el-dialog title="文件预览" :visible.sync="previewDialogVisible" width="90%" class="preview-dialog">
         <el-table
             :data="sheetConcent"
             style="width:100%"
             highlight-current-row
-            max-height="400">
+            max-height="400"
+            border>
             <el-table-column type="index" label="序号" width="80"></el-table-column>
             <el-table-column prop="__rowNum__" label="行号" width="80"></el-table-column>
             <el-table-column v-for="(val,k,index) in sheetRow" v-bind:key="index" :prop="val" :label="val"></el-table-column>
@@ -71,13 +72,22 @@
             style="width:100%"
             highlight-current-row
             max-height="475">
-            <el-table-column type="index" label="序号" width="80"></el-table-column>
-            <el-table-column prop="roder" label="行号" width="80"></el-table-column>
-            <el-table-column prop="no" label="学号" width="100"></el-table-column>
-            <el-table-column prop="name" label="姓名" width="100"></el-table-column>
-            <el-table-column prop="sex" label="性别" width="100"></el-table-column>
-            <el-table-column prop="class_name" label="班级" width="100"></el-table-column>
-            <el-table-column prop="errorInfo" label="错误信息"></el-table-column>
+            <el-table-column type="expand">
+                <template slot-scope="props">
+                    <el-form label-position="left" class="demo-table-expand">
+                        <el-form-item v-for="(val,k,index) in props.row.errorInfo" v-bind:key="index" label="错误信息描述:">
+                            <span><font color="red">{{ props.row.errorInfo[k] }}</font></span>
+                        </el-form-item>
+                    </el-form>
+                </template>
+            </el-table-column>
+            <el-table-column type="index" label="序号" ></el-table-column>
+            <el-table-column prop="roder" label="行号" ></el-table-column>
+            <el-table-column prop="no" label="学号" ></el-table-column>
+            <el-table-column prop="name" label="姓名" ></el-table-column>
+            <el-table-column prop="sex" label="性别" ></el-table-column>
+            <el-table-column prop="class_name" label="班级" ></el-table-column>
+            <!-- <el-table-column prop="errorInfo" label="错误信息"></el-table-column> -->
         </el-table>
     </div>
 </div>
@@ -320,6 +330,24 @@ export default {
 .pos3{
     width:10%;
     float:left
+}
+
+.demo-table-expand {
+    font-size: 0;
+}
+
+.demo-table-expand label {
+    width: 90px;
+    color: #99a9bf;
+}
+
+.demo-table-expand .el-form-item {
+    margin-right: 0;
+    margin-bottom: 0;
+}
+
+/deep/.el-dialog__body{
+    padding:10px 20px 20px
 }
 </style>
 <style lang="less" src="../css/table.less" scoped></style>
