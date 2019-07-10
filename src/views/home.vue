@@ -28,7 +28,7 @@
                                 <span class="menuTitle">{{ list.name }}</span>
                             </template>
                             <template v-if="list.item">
-                                <el-menu-item v-for="(subList,k,idx) in list.item" v-bind:key="idx" :index="subList.uri">
+                                <el-menu-item class="submenu_item_self" v-for="(subList,k,idx) in list.item" v-bind:key="idx" :index="subList.uri">
                                     <i class="el-icon-caret-right"></i>
                                     <span slot="title" class="item-menu">{{ subList.name }}</span>
                                 </el-menu-item>
@@ -194,7 +194,7 @@ export default {
 
 .menuTitle{
     font-size: 15px;
-    font-weight:bold
+    font-weight:bold;
 }
 
 /deep/.el-menu{
@@ -206,4 +206,18 @@ export default {
     content:"\E794"
 }
 
+/deep/.el-menu-item{
+    height: 50px;
+    line-height: 60px
+}
+
+/deep/.el-submenu__title{
+    height: 50px;
+    line-height: 60px
+}
+
+.submenu_item_self{
+    height: 30px;
+    line-height: 30px
+}
 </style>

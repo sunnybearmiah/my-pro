@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-// import HelloWorld from '@/components/HelloWorld'
 import login from '@/views/login'
 import home from '@/views/home'
 import students from '@/views/students'
@@ -15,12 +14,6 @@ const router = new Router({
   mode: 'history',
   base: '/dist/',
   routes: [
-    // {
-    //   path: '/dist',
-    //   name: '',
-    //   redirect: '/',
-    //   hidden: true
-    // },
     {
       path: '/',
       name: '',
@@ -29,7 +22,7 @@ const router = new Router({
     },
     {
       path: '/',
-      // name: '首页',
+      name: '',
       component: home,
       children: [
         {path: '/welcome', component: welcome, name: '欢迎页面'}
