@@ -3,7 +3,8 @@ import qs from 'qs'
 import conf from './config'
 
 let instance = axios.create({
-  baseURL: conf.apiMockRap2, // api的base_url
+  // baseURL: conf.apiMockRap2, // api的base_url
+  baseURL: conf.me,
   // baseURL: conf.apiBaseUrl_xwj,
   timeout: 10000, // 请求超时时间
   withCredentials: false
@@ -13,7 +14,6 @@ let instance = axios.create({
 // 添加请求拦截器
 instance.interceptors.request.use(function (config) {
   // 在发送请求之前做些什么
-
   return config
 }, function (error) {
   // 对请求错误做些什么
@@ -40,7 +40,7 @@ export const classInfo = params => { return instance.get('/selectAllClass', {par
 export const classInfoFilter = params => { return instance.get('/selectClasses', {params: params}).then(res => res.data) }
 
 // POST方法使用非json形式传输
-// instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+instance.defaults.headers.post['Content-Type'] = 'application/json;charset=utf-8'
 // 学生信息增删改
 export const addStu = params => { return instance.post('/insertAction', params).then(res => res.data) }
 export const delStu = params => { return instance.post('/deleteAction', params).then(res => res.data) }

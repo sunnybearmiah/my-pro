@@ -362,6 +362,7 @@ export default {
         handleDel(index,row){//删除按钮 
             this.IDs = []
             this.IDs.push(row.id)
+            // console.log("+++++++++++")
             // console.log(this.IDs)
             this.del(this.IDs)
         },

@@ -120,9 +120,11 @@ export default {
     methods: {
         async handleConfirm(){
             this.sheetName = this.sheets[this.sheetId]
-            console.log(this.sheetName)
-            this.sheetConcent = await getExcel(this.uploadFileMsg.raw,shToJson,[this.sheetName])
-            console.log(sheetConcent)
+     
+            let result = await getExcel(this.uploadFileMsg.raw,shToJson,[this.sheetName])
+            this.sheetConcent = result[1]
+            this.sheetRow = result[0]
+          
             this.checkContent()
             if(this.errorTable.length === 0){
                 this.$message.success("上传文件格式校验成功，请点击上传按钮上传文件")
@@ -140,7 +142,7 @@ export default {
             this.selDialogFormVisible=false
         },
         handleRemove(file, fileList) {
-            console.log(file, fileList);
+  
             this.uploadFileName = ''
             this.fileList = []
             this.uploadFileMsg = {}
@@ -185,10 +187,11 @@ export default {
                 return
             }else{
                 this.sheetName = this.sheets[0]
-                this.sheetConcent = await getExcel(file.raw,shToJson,[this.sheetName])
-                console.log(this.sheetConcent)
-                this.checkContent()
-                if(this.errorTable.length === 0){
+                let result = await getExcel(this.uploadFileMsg.raw,shToJson,[this.sheetName])
+                this.sheetConcent = result[1]
+                this.sheetRow = result[0]
+             
+                if(this.checkContent()){
                     this.cheDialogVisible = false
                     this.$message.success("上传文件格式校验成功，请点击上传按钮上传文件")
                     this.importBtn = false //允许导入
@@ -226,48 +229,44 @@ export default {
             })
         },
         handlePreview(file) { //点击文件列表中的文件,让他预览吧
-            console.log("__________")
-            console.log(this.sheetRow)
-            console.log(this.sheetConcent);
             this.previewDialogVisible = true
         },
         preview(){ //预览
-            console.log("preview")
-            console.log(this.sheetRow)
-            console.log(this.sheetConcent);
             this.previewDialogVisible = true
         },
         download(){
-            console.log("download")
             window.open("../static/upload/template/student.xlsx","_self"); //打包之后
             window.open("../../static/upload/template/student.xlsx","_self"); //dev 环境下
         },
         //对sheet返回的json做校验
         checkContent(){
+            let res = false
             this.cheDialogVisible = true
             //先校验格式 10%
-            let title = ['no','name','sex','classes']
-            let row = this.sheetConcent[0]
-            for(let key in row){
-                this.sheetRow.push(key)
-            }
+            let title = ['id','no','name','sex','classes']
+            let row = this.sheetRow
+            let exists = false
             for (let i=0;i<title.length;i++){
                 let col = title[i]
-                let exists = false
+                exists = false
                 for(let k in row){
-                    if(col === k.trim()){
+                    if(col === row[k]){
                         exists = true
                         break
                     }
                 }
+
                 if(!exists){
                     this.progressStatus = "warning"
-                    this.$message.warning("上传的文件请严格按照模板填写，模板表头不可修改")
                     this.cheDialogVisible = false
+                    this.$message.warning("上传的文件请严格按照模板填写，模板表头不可修改且内容均不能为空。")
+                    this.previewBtn = false
                     break
-                    return
                 }
                 this.percent = this.percent + 2.5
+            }
+            if(!exists){
+                return res
             }
             //再校验内容 90%
             let noPatt = /^[1-9]{1,5}[0-9]{0,1}$/
@@ -276,10 +275,10 @@ export default {
             for(let i=0;i<this.sheetConcent.length;i++){
                 let errorInfo = []
                 let rows = this.sheetConcent[i]
-                let no = rows.no
-                let name = (rows.name).toString().trim()
-                let sex = rows.sex.trim()
-                let classes = rows.classes.trim()
+                let no = (rows.no)?rows.no:''
+                let name = (rows.name)?(rows.name).toString().trim():''
+                let sex = (rows.sex)?rows.sex.trim():''
+                let classes = (rows.classes)? rows.classes.trim():''
                 let errorRow = {
                     roder:rows.__rowNum__,
                     no:no,
@@ -287,7 +286,7 @@ export default {
                     sex:sex,
                     class_name:classes
                 }
-
+            
                 if(!noPatt.test(no)){
                     let msg = "学号no内容只能是1到6个的数字组成。"
                     errorInfo.push(msg)
@@ -310,7 +309,11 @@ export default {
                 }
                 this.percent = this.percent + ((i+1)/this.sheetConcent.length)*0.9
             }
-            console.log(this.errorTable)
+            if(this.errorTable.length>0){
+                return false
+            }else{
+                return true
+            }
         }
     }
   }

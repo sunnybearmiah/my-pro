@@ -29,10 +29,19 @@ export function getSheets (wb) {
   return res
 }
 
-// 把sheet内容转成json，并返回
+// 把sheet内容转成json，并返回sheet头部
 export function shToJson (sheetName, wb) {
+  let result = []
   let res = []
   let ws = wb.Sheets[sheetName]
+  let header = []
+  let rg = ws['!ref'].split(":")[1]
+  for(let i=65;i<=rg.charCodeAt(0);i++){
+    let code = ws[(String.fromCharCode(i) + 1)].v
+    header.push(code)
+  }
   res = XLSX.utils.sheet_to_json(ws)
-  return res
+  result.push(header)
+  result.push(res)
+  return result
 }
