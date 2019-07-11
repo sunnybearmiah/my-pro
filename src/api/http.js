@@ -4,7 +4,7 @@ import conf from './config'
 
 let instance = axios.create({
   // baseURL: conf.apiMockRap2, // api的base_url
-  baseURL: conf.me,
+  baseURL: conf.apiBaseUrl,
   // baseURL: conf.apiBaseUrl_xwj,
   timeout: 10000, // 请求超时时间
   withCredentials: false

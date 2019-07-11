@@ -11,10 +11,19 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/', //打包部署时候变成./
-    proxyTable: {},
+    proxyTable: {
+      '/api': {
+        // 这个地址会在打包的时候起作用，打包时只改这个就行了
+        target: conf.apiMockRap2,
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': ''
+        }
+      }
+    },
 
     // Various Dev Server settings
-    host: conf.hostBase, // can be overwritten by process.env.HOST
+    host: conf.hostIP, // can be overwritten by process.env.HOST
     port: 8888, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,
     errorOverlay: true,

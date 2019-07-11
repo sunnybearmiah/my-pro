@@ -12,7 +12,6 @@ Vue.use(Router)
 const router = new Router({
   // 地址栏去掉#
   mode: 'history',
-  base: '/dist/',
   routes: [
     {
       path: '/',
