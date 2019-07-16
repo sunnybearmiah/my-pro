@@ -64,9 +64,17 @@
             <el-table-column prop="__rowNum__" label="行号" width="100px"></el-table-column>
             <el-table-column v-for="(val,k,index) in sheetRow" v-bind:key="index" :prop="val" :label="val"></el-table-column>
         </el-table>
+        <!-- <div slot="footer" class="dialog-footer">
+            <el-button @click="formOff">取 消</el-button>
+            <el-button type="primary" @click="handleAdd">确 定</el-button>
+        </div> -->
     </el-dialog>
     <div id="errorTb" style="display:none;">
-        <div style="margin:5px"><font size="4" color="red"><b>检测结果错误提示</b></font></div>
+        <div style="margin:5px">
+            <font size="4" color="red">
+                <b>检测结果错误提示</b>
+            </font>
+        </div>
         <el-table
             :data="errorTable"
             style="width:100%"
@@ -158,6 +166,7 @@ export default {
             errorDiv.style.display = 'none'
         },
         handleExceed(files, fileList) { //选择文件后
+         
             this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
         },
         beforeRemove(file, fileList) {
@@ -176,6 +185,7 @@ export default {
                 this.$message.warning("上传的文件大小必须小于5Mb")
                 return
             }
+            console.log(file)
             this.uploadFileName = file.name
             this.uploadFileMsg = file
             this.fileList.push(file)

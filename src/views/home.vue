@@ -53,7 +53,7 @@
                     </el-breadcrumb>
                 </div>
                 <div class="header_2">
-                <img src="../assets/user.png" style="height:5%; width:5%; line-height:60px"/>
+                <img src="../assets/user.png" style="height:60px; width:60px; line-height:60px"/>
                     <el-dropdown>
                         <span class="el-dropdown-link">
                             {{userName}}
