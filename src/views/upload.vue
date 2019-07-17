@@ -64,38 +64,82 @@
             <el-table-column prop="__rowNum__" label="行号" width="100px"></el-table-column>
             <el-table-column v-for="(val,k,index) in sheetRow" v-bind:key="index" :prop="val" :label="val"></el-table-column>
         </el-table>
-        <!-- <div slot="footer" class="dialog-footer">
-            <el-button @click="formOff">取 消</el-button>
-            <el-button type="primary" @click="handleAdd">确 定</el-button>
-        </div> -->
     </el-dialog>
     <div id="errorTb" style="display:none;">
         <div style="margin:5px">
-            <font size="4" color="red">
+            <el-button type="primary" size="mini" @click="handleEdit" :disabled="editBtn" class="error-left">在线编辑</el-button>
+            <el-button @click="addRow"  class="error-left"
+                    type="primary" :style="{ display: editOnlineClick }"
+                    size="mini" 
+                    icon="el-icon-circle-plus">
+            </el-button>
+            <el-button @click="delRows"  class="error-left"
+                    type="primary" :style="{ display: editOnlineClick }"
+                    size="mini" 
+                    icon="el-icon-remove">
+                </el-button>
+            <font size="4" color="red"> 
                 <b>检测结果错误提示</b>
             </font>
+            <el-button type="primary" size="mini" @click="handleEditCancel" :disabled="editBtn" class="error-right" :style="{ display: editOnlineClick }">取消编辑</el-button>
+            <el-button type="primary" size="mini" @click="handleEditConfirm" :disabled="editBtn" class="error-right" :style="{ display: editOnlineClick }">确认</el-button>
         </div>
         <el-table
-            :data="errorTable"
+            :data="editOnline?editTable:errorTable"
             style="width:100%"
             highlight-current-row
-            max-height="475">
-            <el-table-column type="expand">
-                <template slot-scope="props">
-                    <el-form label-position="left" class="demo-table-expand">
-                        <el-form-item v-for="(val,k,index) in props.row.errorInfo" v-bind:key="index" label="错误信息描述:">
-                            <span><font color="red">{{ props.row.errorInfo[k] }}</font></span>
-                        </el-form-item>
-                    </el-form>
+            max-height="475"
+            @selection-change="editRow"
+            @select="handleSelect"
+            @select-all="handleSelectAll">
+            <template>
+                <!-- 不显示错误提示框1.没有错误 2.新增的行 -->
+                <template> 
+                    <el-table-column type="expand">
+                        <template slot-scope="props">
+                            <el-form label-position="left" class="demo-table-expand">
+                                <el-form-item v-for="(val,k,index) in props.row.errorInfo" v-bind:key="index" label="错误信息描述:">
+                                    <span><font color="red">{{ props.row.errorInfo[k] }}</font></span>
+                                </el-form-item>
+                            </el-form>
+                        </template>
+                    </el-table-column>
                 </template>
-            </el-table-column>
-            <el-table-column type="index" label="序号" width="100px"></el-table-column>
-            <el-table-column prop="roder" label="行号" ></el-table-column>
-            <el-table-column prop="no" label="学号" ></el-table-column>
-            <el-table-column prop="name" label="姓名" ></el-table-column>
-            <el-table-column prop="sex" label="性别" ></el-table-column>
-            <el-table-column prop="class_name" label="班级" ></el-table-column>
-            <!-- <el-table-column prop="errorInfo" label="错误信息"></el-table-column> -->
+                <el-table-column v-if="editOnline" type="selection" width="45" align="center"></el-table-column>
+                <el-table-column type="index" label="序号" width="100px">
+                </el-table-column>
+                <el-table-column prop="roder" label="行号" >
+                </el-table-column>
+
+                <el-table-column v-if="editOnline" label="学号" >
+                    <template slot-scope="scope">
+                        <el-input v-model="scope.row.no"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column v-else prop="no" label="学号" ></el-table-column>
+
+                <el-table-column v-if="editOnline" label="姓名" >
+                    <template slot-scope="scope">
+                        <el-input v-model="scope.row.name"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column v-else prop="name" label="姓名" ></el-table-column>
+
+                <el-table-column v-if="editOnline" label="性别" >
+                    <template slot-scope="scope">
+                        <el-input v-model="scope.row.sex"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column v-else prop="sex" label="性别" ></el-table-column>
+
+                <el-table-column v-if="editOnline" label="班级" >
+                    <template slot-scope="scope">
+                        <el-input v-model="scope.row.class_name"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column v-else prop="class_name" label="班级" ></el-table-column>
+                <!-- <el-table-column prop="errorInfo" label="错误信息"></el-table-column> -->
+            </template>
         </el-table>
     </div>
 </div>
@@ -107,6 +151,7 @@ import {getExcel,getSheets,shToJson} from '../common/excel'
 export default {
     data() {
         return {
+            selection:[],
             uploadFileName:'', //文件名
             fileList:[],
             uploadFileMsg: {},
@@ -122,10 +167,48 @@ export default {
             progressStatus:"success",
             previewDialogVisible:false,
             previewBtn:true,
-            importBtn:true  //导入按钮是否可用
+            importBtn:true,  //导入按钮是否可用
+            editBtn:true,
+            editTable:[],
+            finalTable:[],
+            editOnlineClick:"none",
+            editOnline:false //在线编辑功能是否点击
         }
     },
     methods: {
+        handleSelectAll(selection){
+            this.selection = selection
+        },
+        handleSelect(selection,row){ //被选中就添加，反选删除
+            this.selection = selection
+        },
+        editRow(row){  //修改行
+            console.log("++++++++")
+            console.log(row)
+        },
+        handleEditConfirm(){  //在线编辑确认
+
+        },
+        handleEditCancel(){  //取消在线编辑
+            this.editOnline = false
+            this.editOnlineClick = 'none'
+        },
+        addRow(){  //添加一行
+            this.editTable.unshift({
+                roder : '#',
+                no : null,
+                name : '',
+                sex : '',
+                class_name : ''
+            })
+        },
+        delRows(){  //删除行
+
+        },
+        handleEdit(){  //点击在线编辑按钮
+            this.editOnline = true
+            this.editOnlineClick = ''
+        },
         async handleConfirm(){
             this.sheetName = this.sheets[this.sheetId]
      
@@ -143,6 +226,7 @@ export default {
                 this.cheDialogVisible = false
                 let errorDiv = document.getElementById("errorTb")
                 errorDiv.style.display = 'block'
+                this.editBtn = false
             }
             this.previewBtn = false
         },
@@ -162,11 +246,12 @@ export default {
             this.cheDialogVisible = false
             this.previewDialogVisible = false
             this.previewBtnv = true
+            this.editBtn = true
             let errorDiv = document.getElementById("errorTb")
             errorDiv.style.display = 'none'
         },
         handleExceed(files, fileList) { //选择文件后
-         
+
             this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
         },
         beforeRemove(file, fileList) {
@@ -212,6 +297,7 @@ export default {
                     this.cheDialogVisible = false
                     let errorDiv = document.getElementById("errorTb")
                     errorDiv.style.display = 'block'
+                    this.editBtn = false
                 }
             }
             this.previewBtn = false
@@ -316,7 +402,13 @@ export default {
                 if(errorInfo.length>0){
                     errorRow.errorInfo = errorInfo
                     this.errorTable.push(errorRow)
+                    this.editTable.unshift(errorRow)
+                }else{
+                    this.editTable.push(errorRow)
                 }
+                console.log(this.errorTable)
+                console.log(this.editOnline)
+                console.log(this.editTable)
                 this.percent = this.percent + ((i+1)/this.sheetConcent.length)*0.9
             }
             if(this.errorTable.length>0){
@@ -361,6 +453,16 @@ export default {
 
 /deep/.el-dialog__body{
     padding:10px 20px 20px
+}
+
+.error-left{
+    margin-left: 10px;
+    float: left;
+}
+
+.error-right{
+    margin-right: 10px;
+    float: right;
 }
 </style>
 <style lang="less" src="../css/table.less" scoped></style>
