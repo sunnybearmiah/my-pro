@@ -51,7 +51,7 @@ export const addClass = params => { return instance.post('/addClasses', params).
 export const delClass = params => { return instance.post('/deleteClasses', params).then(res => res.data) }
 export const updClass = params => { return instance.post('/updateClasses', params).then(res => res.data) }
 
-// 文件上传
+// 文件上传 2019/7/8改了
 // instance.defaults.headers.post['Content-Type'] = 'multipart/form-data; charset=UTF-8'
 export const uploadStu = params => { return instance.post('/upload', params).then(res => res.data) }
 

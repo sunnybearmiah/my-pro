@@ -6,7 +6,7 @@
                 <div class="pos1">
                     <span>文件地址：</span>
                     <el-input v-model="uploadFileName" value="uploadFileName" placeholder="请单击选取文件按钮" style="width:60%"></el-input>
-                    <el-button size="small" type="primary" style="margin-left:1%" @click="preview" :disabled="previewBtn">预览</el-button>
+                    <el-button size="small" type="primary" style="margin-left:1%" @click="preview" :disabled="previewBtn">预览上传文件</el-button>
                     <div>只能上传xlsx文件，且不超过5Mb</div>
                 </div>
                 <div class="pos2">
@@ -53,7 +53,7 @@
             <el-progress type="circle" :percentage="percent" :status="progressStatus"></el-progress>
         </el-dialog>
     </el-card>
-    <el-dialog title="文件预览" :visible.sync="previewDialogVisible" width="90%" class="preview-dialog">
+    <el-dialog title="excel文件预览" :visible.sync="previewDialogVisible" width="90%" class="preview-dialog">
         <el-table
             :data="sheetConcent"
             style="width:100%"
@@ -65,7 +65,7 @@
             <el-table-column v-for="(val,k,index) in sheetRow" v-bind:key="index" :prop="val" :label="val"></el-table-column>
         </el-table>
     </el-dialog>
-    <div id="errorTb" style="display:none;">
+    <div id="errorTb" style="display:none;float:left;width:95%">
         <div style="margin:5px">
             <el-button type="primary" size="mini" @click="handleEdit" :disabled="editBtn" class="error-left">在线编辑</el-button>
             <el-button @click="addRow"  class="error-left"
@@ -79,21 +79,21 @@
                     icon="el-icon-remove">
                 </el-button>
             <font size="4" color="red"> 
-                <b>检测结果错误提示</b>
+                <b style="color:black" v-if="editOnline">在线编辑</b>
+                <b v-else>检测结果错误提示</b>
             </font>
             <el-button type="primary" size="mini" @click="handleEditCancel" :disabled="editBtn" class="error-right" :style="{ display: editOnlineClick }">取消编辑</el-button>
-            <el-button type="primary" size="mini" @click="handleEditConfirm" :disabled="editBtn" class="error-right" :style="{ display: editOnlineClick }">确认</el-button>
+            <el-button type="primary" size="mini" @click="upload" :disabled="editBtn" class="error-right" :style="{ display: editOnlineClick }">确认上传</el-button>
         </div>
         <el-table
             :data="editOnline?editTable:errorTable"
             style="width:100%"
             highlight-current-row
             max-height="475"
-            @selection-change="editRow"
+            @selection-change="selRow"
             @select="handleSelect"
             @select-all="handleSelectAll">
             <template>
-                <!-- 不显示错误提示框1.没有错误 2.新增的行 -->
                 <template> 
                     <el-table-column type="expand">
                         <template slot-scope="props">
@@ -111,34 +111,54 @@
                 <el-table-column prop="roder" label="行号" >
                 </el-table-column>
 
-                <el-table-column v-if="editOnline" label="学号" >
-                    <template slot-scope="scope">
-                        <el-input v-model="scope.row.no"></el-input>
-                    </template>
-                </el-table-column>
-                <el-table-column v-else prop="no" label="学号" ></el-table-column>
-
-                <el-table-column v-if="editOnline" label="姓名" >
-                    <template slot-scope="scope">
-                        <el-input v-model="scope.row.name"></el-input>
-                    </template>
-                </el-table-column>
-                <el-table-column v-else prop="name" label="姓名" ></el-table-column>
-
-                <el-table-column v-if="editOnline" label="性别" >
-                    <template slot-scope="scope">
-                        <el-input v-model="scope.row.sex"></el-input>
-                    </template>
-                </el-table-column>
-                <el-table-column v-else prop="sex" label="性别" ></el-table-column>
-
-                <el-table-column v-if="editOnline" label="班级" >
-                    <template slot-scope="scope">
-                        <el-input v-model="scope.row.class_name"></el-input>
-                    </template>
-                </el-table-column>
-                <el-table-column v-else prop="class_name" label="班级" ></el-table-column>
-                <!-- <el-table-column prop="errorInfo" label="错误信息"></el-table-column> -->
+                 <template v-if="!editOnline">
+                    <el-table-column prop="no" label="学号" ></el-table-column>
+                    <el-table-column prop="name" label="姓名" ></el-table-column>
+                    <el-table-column prop="sex" label="性别" ></el-table-column>
+                    <el-table-column prop="class_name" label="班级" ></el-table-column>
+                </template>
+                <template v-else>
+                    <el-table-column label="学号" >
+                        <template slot-scope="scope">
+                            <el-form :model="scope.row" :rules="rules" ref="no" size="small" status-icon>
+                                <el-form-item prop="no">
+                                    <el-input size="small" v-model="scope.row.no" clearable></el-input>
+                                </el-form-item>
+                            </el-form>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="姓名" >
+                        <template slot-scope="scope">
+                            <el-form :model="scope.row" :rules="rules" ref="name" size="small" status-icon>
+                                <el-form-item prop="name">
+                                    <el-input size="small" v-model="scope.row.name" clearable></el-input>
+                                </el-form-item>
+                            </el-form>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="性别" >
+                        <template slot-scope="scope">
+                            <el-form status-icon size="small">
+                                <el-form-item required>
+                                    <el-select v-model="scope.row.sex" placeholder="请选择性别" style="display:inline">
+                                        <el-option label="男" value='男'></el-option>
+                                        <el-option label="女" value='女'></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-form>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="班级" >
+                        <template slot-scope="scope">
+                            <el-form status-icon size="small">
+                                <el-form-item required>
+                                    <el-input size="small" v-model="scope.row.class_name"></el-input>
+                                </el-form-item>
+                            </el-form>
+                        </template>
+                    </el-table-column>
+                </template>
+            
             </template>
         </el-table>
     </div>
@@ -170,9 +190,16 @@ export default {
             importBtn:true,  //导入按钮是否可用
             editBtn:true,
             editTable:[],
-            finalTable:[],
+            originTable:[],
+            maxRow : null,
             editOnlineClick:"none",
-            editOnline:false //在线编辑功能是否点击
+            editOnline:false, //在线编辑功能是否点击
+            rules:{
+                no:[{required:true,message:'请输入学号',trigger:'blur'},
+                    {pattern:/^[1-9]{1,5}[0-9]{0,1}$/,message:'学号不能超过六位整数,不能以0开头',trigger:'blur'}],
+                name:[{required:true,message:'请输入名字',trigger:'blur'},
+                    {pattern:/^[a-zA-Z0-9_\u4e00-\u9fa5]{1,6}$/,message:'姓名长度在1到6个字符的中文数字字母和下划线',trigger:'blur'}]
+            }
         }
     },
     methods: {
@@ -180,22 +207,41 @@ export default {
             this.selection = selection
         },
         handleSelect(selection,row){ //被选中就添加，反选删除
+        console.log("**************")
+            console.log(this.originTable)
             this.selection = selection
         },
-        editRow(row){  //修改行
-            console.log("++++++++")
-            console.log(row)
-        },
-        handleEditConfirm(){  //在线编辑确认
-
+        selRow(row){  //修改行
+            console.log("had000000000")
+            console.log(this.originTable)
+            this.selection = row
         },
         handleEditCancel(){  //取消在线编辑
-            this.editOnline = false
-            this.editOnlineClick = 'none'
+            console.log("+++++++")
+            console.log(this.originTable)
+            console.log(this.editOnline)
+
+            this.$confirm('取消编辑是否暂存本次编辑的数据以便下次继续编辑？','提示',{
+                confirmButtonText: '暂存',
+                cancelButtonText: '不暂存',
+                type: 'warning'
+            }).then(()=>{
+                this.editOnline = false
+                this.editOnlineClick = 'none'
+            }).catch(() => {
+                this.editTable = []
+                console.log(this.originTable)
+                this.editTable = this.editTable.concat(this.originTable)
+                console.log(this.editTable)
+                this.editOnline = false
+                this.editOnlineClick = 'none'
+                this.$message.info('已还原数据')  
+            })     
         },
         addRow(){  //添加一行
+            this.maxRow = this.maxRow+1
             this.editTable.unshift({
-                roder : '#',
+                roder : this.maxRow+'#',
                 no : null,
                 name : '',
                 sex : '',
@@ -203,7 +249,22 @@ export default {
             })
         },
         delRows(){  //删除行
-
+            if(this.selection.length==0){
+                this.$message.warning("未选中任何记录。")
+                return
+            }
+            for(let i=0;i<this.selection.length;i++){
+                let val = this.selection
+                val.forEach((val, index) => {
+                    this.editTable.forEach((v, i) => {
+                        if (val.roder == v.roder) {
+                            // i 为选中的索引
+                            this.editTable.splice(i, 1)
+                        }
+                    })
+                })
+            }
+            this.$refs.editTable.clearSelection()
         },
         handleEdit(){  //点击在线编辑按钮
             this.editOnline = true
@@ -283,8 +344,9 @@ export default {
             }else{
                 this.sheetName = this.sheets[0]
                 let result = await getExcel(this.uploadFileMsg.raw,shToJson,[this.sheetName])
-                this.sheetConcent = result[1]
-                this.sheetRow = result[0]
+                this.sheetConcent = result[1] //内容
+                this.sheetRow = result[0] //表头
+                this.maxRow = result[2]  //最大行数
              
                 if(this.checkContent()){
                     this.cheDialogVisible = false
@@ -305,22 +367,33 @@ export default {
         // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet    .xlsx
         // application/vnd.ms-excel        .xls
         upload(){ //导入
-            if(!this.uploadFileMsg || this.fileList.length===0){
-                this.$message.warning("当前没有可导入的文件，请先选择1个文件")
+            // if(!this.uploadFileMsg || this.fileList.length===0){
+            //     this.$message.warning("当前没有可导入的文件，请先选择1个文件")
+            //     return
+            // }
+            if(this.editTable.length==0){
+                this.$message.warning("当前没有数据可以导入")
                 return
             }
-            let data = new FormData()
-            data.append("file",this.uploadFileMsg.raw) //二进制数据传输
-            data.append("sheetID",this.sheetId)
-            let params = data   
+            // let data = new FormData()
+            // data.append("file",this.uploadFileMsg.raw) //二进制数据传输
+            // data.append("sheetID",this.sheetId)
+            let params = this.editTable   
             uploadStu(params).then(res=>{
                 if(res.status === 200){
-                    this.$message.success("文件上传成功")
+                    this.$message.success("数据导入成功")
                 }else{
                     this.errorTable = res.wrongList
+                    this.errorTable.forEach((val,idx)=>{
+                        this.editTable.forEach((v,i)=>{
+                            if(val.roder == v.roder){
+                                this.editTable[i].errorInfo = this.errorTable[idx].errorInfo
+                            }
+                        })
+                    })
                     let errorDiv = document.getElementById("errorTb")
                     errorDiv.style.display = 'block'
-                    this.$message.error(res.msg || "文件上传失败")
+                    this.$message.error(res.msg || "数据导入失败")
                 }
             })
         },
@@ -406,9 +479,14 @@ export default {
                 }else{
                     this.editTable.push(errorRow)
                 }
+                let a = []
+                a = this.editTable.slice()
+                this.originTable = this.originTable.concat(a)
+
                 console.log(this.errorTable)
                 console.log(this.editOnline)
                 console.log(this.editTable)
+                console.log(this.originTable)
                 this.percent = this.percent + ((i+1)/this.sheetConcent.length)*0.9
             }
             if(this.errorTable.length>0){

@@ -72,10 +72,10 @@
     <el-dialog title="新增学生" :visible.sync="addDialogFormVisible">
         <el-form style="margin-right:120px" :model="addForm" :rules="rulesAdd" ref="addForm">
             <el-form-item label="学号：" :label-width="formLabelWidth" prop="no">
-                <el-input v-model="addForm.no" placeholder="请输入学号"></el-input>
+                <el-input v-model="addForm.no" clearable placeholder="请输入学号"></el-input>
             </el-form-item>
             <el-form-item label="姓名：" :label-width="formLabelWidth" prop="name">
-                <el-input v-model="addForm.name" placeholder="请输入姓名"></el-input>
+                <el-input v-model="addForm.name" clearable placeholder="请输入姓名"></el-input>
             </el-form-item>
             <el-form-item label="性别：" :label-width="formLabelWidth" required>
                 <el-select v-model="addForm.sex" placeholder="请选择性别" style="display:inline">
@@ -102,7 +102,7 @@
                 <el-input v-model="updForm.no" placeholder="请输入学号" :disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="姓名：" :label-width="formLabelWidth" prop="name">
-                <el-input v-model="updForm.name" placeholder="请输入姓名"></el-input>
+                <el-input v-model="updForm.name" clearable placeholder="请输入姓名"></el-input>
             </el-form-item>
             <el-form-item label="性别：" :label-width="formLabelWidth" required>
                 <el-select v-model="updForm.sex" placeholder="请选择性别" style="display:inline">

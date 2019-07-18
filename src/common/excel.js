@@ -35,13 +35,16 @@ export function shToJson (sheetName, wb) {
   let res = []
   let ws = wb.Sheets[sheetName]
   let header = []
-  let rg = ws['!ref'].split(":")[1]
-  for(let i=65;i<=rg.charCodeAt(0);i++){
+  let rg = ws['!ref'].split(':')[1]
+  let patt = /[0-9]+/
+  let val = patt.exec(rg)[0]
+  for (let i = 65; i <= rg.charCodeAt(0); i++) {
     let code = ws[(String.fromCharCode(i) + 1)].v
     header.push(code)
   }
   res = XLSX.utils.sheet_to_json(ws)
   result.push(header)
   result.push(res)
+  result.push(parseInt(val) - 1)
   return result
 }
