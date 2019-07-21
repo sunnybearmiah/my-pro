@@ -152,7 +152,7 @@
                 </el-table-column>
                 <el-table-column v-if="editOnline" label="性别" align="center" width="100px">
                     <template slot-scope="scope">
-                            <el-form-item required>
+                            <el-form-item :prop="'editTable.' + scope.$index + '.sex'" :rules='rules.sex'>
                                 <el-select v-model="scope.row.sex" placeholder="请选择性别" style="display:inline">
                                     <el-option label="男" value='男'></el-option>
                                     <el-option label="女" value='女'></el-option>
@@ -180,19 +180,19 @@ export default {
     data() {
         return {
             form:{
-                errorTable:[{
-                    roder:null,
-                    no:'',
-                    name:'',
-                    sex:'',
-                    class_name:''
-                },{
-                    roder:null,
-                    no:'',
-                    name:'',
-                    sex:'',
-                    class_name:''
-                }],
+                // errorTable:[{
+                //     roder:null,
+                //     no:'',
+                //     name:'',
+                //     sex:'',
+                //     class_name:''
+                // },{
+                //     roder:null,
+                //     no:'',
+                //     name:'',
+                //     sex:'',
+                //     class_name:''
+                // }],
                 editTable:[{
                     roder:null,
                     no:'',
@@ -235,7 +235,9 @@ export default {
                 no:[{required:true,message:'请输入学号',trigger:'blur'},
                     {pattern:/^[1-9]{1,5}[0-9]{0,1}$/,message:'学号不能超过六位整数,不能以0开头',trigger:'blur'}],
                 name:[{required:true,message:'请输入名字',trigger:'blur'},
-                    {pattern:/^[a-zA-Z0-9_\u4e00-\u9fa5]{1,6}$/,message:'名字长度在1到6个字符的中文数字字母和下划线',trigger:'blur'}]
+                    {pattern:/^[a-zA-Z0-9_\u4e00-\u9fa5]{1,6}$/,message:'名字长度在1到6个字符的中文数字字母和下划线',trigger:'blur'}],
+                sex:[{required:true,message:'请选择性别',trigger:'blur'},             {pattern:/男|女/,message:'性别只能是男或女',trigger:'blur'},
+                ]
             }
         }
     },
@@ -269,8 +271,15 @@ export default {
             }).catch(() => {
                 this.editOff = false
                 this.editTable = []
-                console.log(this.originTable)
-                this.editTable = this.editTable.concat(this.originTable)
+                let val = this.originTable
+                val.forEach((value,index) => {
+                    let a = {}
+                    for(let k in value){
+                        a[k] = value[k]
+                    }        
+                    this.editTable[index] = a //还是地址指向？？？           
+                })
+                // this.editTable = this.originTable.slice()
                 console.log(this.editTable)
                 this.editOnline = false
                 this.editOnlineClick = 'none'
@@ -387,19 +396,23 @@ export default {
                 this.sheetConcent = result[1] //内容
                 this.sheetRow = result[0] //表头
                 this.maxRow = result[2]  //最大行数
-             
-                if(this.checkContent()){
+
+                let re = this.checkContent()
+                if( re === true){
                     this.cheDialogVisible = false
                     this.$message.success("上传文件格式校验成功，请点击上传按钮上传文件")
                     this.importBtn = false //允许导入
 
-                }else{
+                }else if(re === false){
                     //展示表格
                     this.progressStatus = "warning"
                     this.cheDialogVisible = false
                     let errorDiv = document.getElementById("errorTb")
                     errorDiv.style.display = 'block'
                     this.editBtn = false
+                }else{
+                    this.progressStatus = "warning"
+                    this.cheDialogVisible = false
                 }
             }
             this.previewBtn = false
@@ -461,8 +474,9 @@ export default {
             let res = false
             this.cheDialogVisible = true
             //先校验格式 10%
-            let title = ['id','no','name','sex','classes']
+            let title = ['no','name','sex','classes']
             let row = this.sheetRow
+            console.log(row)
             let exists = false
             for (let i=0;i<title.length;i++){
                 let col = title[i]
@@ -484,7 +498,7 @@ export default {
                 this.percent = this.percent + 2.5
             }
             if(!exists){
-                return res
+                return 0
             }
             //再校验内容 90%
             let noPatt = /^[1-9]{1,5}[0-9]{0,1}$/
@@ -495,8 +509,8 @@ export default {
                 let rows = this.sheetConcent[i]
                 let no = (rows.no)?rows.no:''
                 let name = (rows.name)?(rows.name).toString().trim():''
-                let sex = (rows.sex)?rows.sex.trim():''
-                let classes = (rows.classes)? rows.classes.trim():''
+                let sex = (rows.sex)?(rows.sex).toString().trim():''
+                let classes = (rows.classes)? (rows.classes).toString().trim():''
                 let errorRow = {   
                     roder:rows.__rowNum__,
                     no:no,
@@ -538,7 +552,7 @@ export default {
                 }else{
                     this.editTable.push(errorRow)
                     // this.originTable.push(errorRow)
-                    this.originTable.unshift({
+                    this.originTable.push({
                         roder:rows.__rowNum__,
                         no:no,
                         name:name,
