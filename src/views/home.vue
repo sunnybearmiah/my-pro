@@ -25,18 +25,22 @@
                         </template>
                         <!-- 两层结构 -->
                         <template v-else>
-                            <el-submenu v-bind:key="idx" :index="list.id.toString()">
-                                <template slot="title">
-                                    <i :class="list.icon"></i>
-                                    <span class="menuTitle">{{ list.name }}</span>
-                                </template>
-                                <template v-if="list.children">
-                                    <el-menu-item class="submenu_item_self" v-for="(subList,k,idx) in list.children" v-bind:key="idx" :index="subList.path">
-                                        <i class="el-icon-caret-right"></i>
-                                        <span slot="title" class="item-menu">{{ subList.name }}</span>
-                                    </el-menu-item>
-                                </template>
-                            </el-submenu>
+                            <template v-if="!list.hidden">
+                                <el-submenu v-bind:key="idx" :index="list.id.toString()">
+                                    <template slot="title">
+                                        <i :class="list.icon"></i>
+                                        <span class="menuTitle">{{ list.name }}</span>
+                                    </template>
+                                    <template v-if="list.children">
+                                        <el-menu-item class="submenu_item_self" v-for="(subList,k,idx) in list.children" v-bind:key="idx" :index="subList.path">
+                                            <template v-if="!subList.hidden">
+                                            <i class="el-icon-caret-right"></i>
+                                            <span slot="title" class="item-menu">{{ subList.name }}</span>
+                                            </template>
+                                        </el-menu-item>
+                                    </template>
+                                </el-submenu>
+                            </template>
                         </template>
                     </template>
                 </template>

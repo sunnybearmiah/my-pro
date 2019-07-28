@@ -5,6 +5,9 @@ import classes from '@/views/classes'
 import welcome from '@/views/welcome'
 import upload from '@/views/upload'
 
+import mlb from '@/views/dispatch/mlb'
+import mlb_detail from '@/views/dispatch/mlb_detail'
+
 export default {
   menu: [
     {
@@ -48,6 +51,17 @@ export default {
       icon: 'el-icon-s-custom',
       children: [
         {id: 1, path: '/classes', name: '班级', component: classes}
+      ]
+    },
+    {
+      id: 4,
+      path: '/',
+      name: '调度管理',
+      component: home,
+      icon: 'el-icon-s-cooperation',
+      children: [
+        {id: 1, path: '/mlb', name: '单板房总调度', component: mlb},
+        {id: 2, path: '/:id/detail', name: '单板房总调度明细', component: mlb_detail, hidden: true}
       ]
     }
   ]
